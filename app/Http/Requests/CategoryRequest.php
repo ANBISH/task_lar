@@ -24,32 +24,30 @@ class CategoryRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            // 'name' => 'required|min:5|max:255'
+        $rules = [
+            'active' => 'required|integer|min:0|max:1',
         ];
+
+        $locales = get_locales();
+        $langRules = [
+            'title' => 'required|string|max:255',
+            'slug' => 'required|string|max:255',
+            'description' => 'required|string',
+        ];
+
+        foreach ($langRules as $field => $rule) {
+            foreach($locales as $locale) {
+                $rules[$field . ':' . $locale] = $rule;
+            }
+        }
+
+        return $rules;
     }
 
-    /**
-     * Get the validation attributes that apply to the request.
-     *
-     * @return array
-     */
-    public function attributes()
-    {
-        return [
-            //
-        ];
-    }
-
-    /**
-     * Get the validation messages that apply to the request.
-     *
-     * @return array
-     */
     public function messages()
     {
         return [
-            //
+
         ];
     }
 }

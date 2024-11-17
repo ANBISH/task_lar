@@ -19,57 +19,51 @@ class PriorityCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
 
-    /**
-     * Configure the CrudPanel object. Apply settings to all operations.
-     * 
-     * @return void
-     */
     public function setup()
     {
         CRUD::setModel(\App\Models\Priority::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/priority');
-        CRUD::setEntityNameStrings('priority', 'priorities');
+        CRUD::setEntityNameStrings('Пріорітет', 'Пріорітети');
     }
 
-    /**
-     * Define what happens when the List operation is loaded.
-     * 
-     * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
-     * @return void
-     */
     protected function setupListOperation()
     {
-        CRUD::setFromDb(); // set columns from db columns.
+        CRUD::addColumn([
+            'name' => 'title',
+            'label' => 'Назва',
+            'searchLogic' => function ($query, $column, $searchTerm) {
+                $query->whereTranslationLike('title', '%' . $searchTerm . '%');
+            }
+        ]);
 
-        /**
-         * Columns can be defined using the fluent syntax:
-         * - CRUD::column('price')->type('number');
-         */
+        CRUD::addColumn([
+            'name' => 'color',
+            'label' => 'Колір',
+            'type' => 'color'
+        ]);
     }
 
-    /**
-     * Define what happens when the Create operation is loaded.
-     * 
-     * @see https://backpackforlaravel.com/docs/crud-operation-create
-     * @return void
-     */
     protected function setupCreateOperation()
     {
         CRUD::setValidation(PriorityRequest::class);
-        CRUD::setFromDb(); // set fields from db columns.
 
-        /**
-         * Fields can be defined using the fluent syntax:
-         * - CRUD::field('price')->type('number');
-         */
+        foreach (get_locales() as $locale) {
+
+            CRUD::addField([
+                'name' => 'title:' . $locale,
+                'label' => 'Назва',
+                'tab' => $locale,
+            ]);
+        }
+
+        CRUD::addField([
+            'name' => 'color',
+            'label' => 'Колір',
+            'type' => 'color',
+            'tab' => 'Основне',
+        ]);
     }
 
-    /**
-     * Define what happens when the Update operation is loaded.
-     * 
-     * @see https://backpackforlaravel.com/docs/crud-operation-update
-     * @return void
-     */
     protected function setupUpdateOperation()
     {
         $this->setupCreateOperation();

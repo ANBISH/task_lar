@@ -12,6 +12,7 @@ class Task extends Model
     use HasFactory;
 
     protected $fillable = [
+        'id',
         'title',
         'description',
         'slug',
@@ -44,7 +45,7 @@ class Task extends Model
 
     public function getDueDateAttribute($value)
     {
-        return \Carbon\Carbon::parse($value)->format('d.m.Y'); // Формат дати
+        return \Carbon\Carbon::parse($value)->format('d.m.Y');
     }
 
     public function setDueDateAttribute($value)

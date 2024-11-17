@@ -6,6 +6,7 @@ use Backpack\CRUD\app\Models\Traits\CrudTrait;
 use Astrotomic\Translatable\Translatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 
 class Category extends Model
 {
@@ -27,5 +28,10 @@ class Category extends Model
     public function tasks()
     {
         return $this->hasMany(Task::class);
+    }
+
+    public function scopeActive(Builder $query, bool $active = true)
+    {
+        return $query->where('active', (int)$active);
     }
 }
