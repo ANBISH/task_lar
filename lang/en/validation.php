@@ -176,6 +176,9 @@ return [
         'attribute-name' => [
             'rule-name' => 'custom-message',
         ],
+        'due_date' => [
+            'date_format' => 'Field "Due Date" must follow the format d.m.Y.',
+        ],
     ],
 
     /*
@@ -189,6 +192,11 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        'title' => 'heading',
+        'description' => 'description',
+        'priority_id' => 'priority',
+        'due_date' => 'due date',
+    ],
 
 ];

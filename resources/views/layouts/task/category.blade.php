@@ -1,6 +1,13 @@
 @extends('common.home')
 
 @section('content')
+    <div class="mb-6">
+        <a href="{{ route('task.create', ['slug' => $category_slug]) }}"
+            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+            Створити +
+        </a>
+    </div>
+
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
         <div class="flex flex-column sm:flex-row flex-wrap space-y-4 sm:space-y-0 items-center justify-between pb-4">
             <div>
@@ -90,6 +97,7 @@
                     placeholder="Search for items">
             </div>
         </div>
+
         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                 <tr>
@@ -131,14 +139,14 @@
                         <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                             {{ Str::limit($task->title, 15, '...') }}
                         </th>
-                        <td class="px-6 py-4" style="background:{{ $task->priority->color }};" >
+                        <td class="px-6 py-4" style="background:{{ $task->priority->color }};">
                             {{ $task->priority->title }}
                         </td>
                         <td class="px-6 py-4">
                             {{ Str::limit($task->description, 25, '...') }}
                         </td>
                         <td class="px-6 py-4">
-                            {{ \Carbon\Carbon::parse($task->create_at)->format('d-m-y') }}
+                            {{ \Carbon\Carbon::parse($task->due_date)->format('d-m-y') }}
                         </td>
                         <td class="px-6 py-4">
                             <a href="{{ route('task.edit', ['slug' => $task->slug]) }}"

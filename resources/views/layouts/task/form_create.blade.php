@@ -2,16 +2,15 @@
 
 @section('content')
     <form class="max-w-sm mx-auto" method="POST"
-        action="{{ route('task.update', ['id' => $task->id, 'slug' => $category_slug]) }}">
+        action="{{ route('task.store', ['slug' => $category_slug]) }}">
         @csrf
-        @method('PUT')
 
         {{-- Поле "Заголовок" --}}
         <div class="mb-5">
             <label for="title" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                 {{ __('task/form.title') }}
             </label>
-            <input type="text" id="title" name="title" value="{{ old('title', $task->title) }}"
+            <input type="text" id="title" name="title" value="{{ old('title') }}"
                 class="bg-gray-50 border @error('title') border-red-500 @else border-gray-300 @enderror text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 placeholder="{{ __('task/form.title_placeholder') }}">
 
@@ -29,7 +28,7 @@
             </label>
             <textarea id="description" name="description" rows="4"
                 class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border @error('description') border-red-500 @else border-gray-300 @enderror focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder="{{ __('task/form.description_placeholder') }}">{{ old('description', $task->description) }}</textarea>
+                placeholder="{{ __('task/form.description_placeholder') }}">{{ old('description') }}</textarea>
 
             @error('description')
                 <p class="mt-2 text-sm text-red-600 dark:text-red-500">
@@ -46,8 +45,7 @@
             <select id="priority" name="priority_id"
                 class="bg-gray-50 border @error('priority_id') border-red-500 @else border-gray-300 @enderror text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                 @foreach ($priority as $p)
-                    <option value="{{ $p->id }}"
-                        {{ old('priority_id', $task->priority_id) == $p->id ? 'selected' : '' }}>
+                    <option value="{{ $p->id }}" {{ old('priority_id') == $p->id ? 'selected' : '' }}>
                         {{ $p->title }}
                     </option>
                 @endforeach
@@ -73,15 +71,14 @@
                 </svg>
             </div>
             <input id="datepicker-autohide" datepicker datepicker-autohide datepicker-format="dd-mm-yyyy" type="text" name="due_date"
-                value="{{ old('due_date', $task->due_date) }}"
-                class="bg-gray-50 border @error('due_date') border-red-500 @else border-gray-300 @enderror text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                value="{{ old('due_date') }}"
+                class="bg-gray-50 border @error('due_date') border-red-500 @else border-gray-300 @enderror text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 placeholder="{{ __('task/form.date_due_placeholder') }}">
 
             @error('due_date')
                 <p class="mt-2 text-sm text-red-600 dark:text-red-500">{{ __('task/form.error') }} {{ $message }}</p>
             @enderror
         </div>
-
 
         {{-- Кнопка --}}
         <div class="mt-4">

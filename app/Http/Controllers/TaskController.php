@@ -6,6 +6,7 @@ use App\Http\Requests\TaskRequest;
 use App\Models\Category;
 use App\Models\Priority;
 use App\Models\Task;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 
 
@@ -16,6 +17,8 @@ class TaskController extends Controller
     {
         $userId = Auth::id();
 
+        $category_slug = $slug;
+
         $tasks = Category::whereActive(1)
             ->whereTranslation('slug', $slug)
             ->with(['tasks' => function ($query) use ($userId) {
@@ -25,7 +28,45 @@ class TaskController extends Controller
             ->firstOrFail()
             ->tasks;
 
-        return view('layouts.task.category', compact('tasks'));
+        return view('layouts.task.category', compact('tasks', 'category_slug'));
+    }
+
+    public function create($slug)
+    {
+        $priority = Priority::all();
+
+        $category_slug = $slug;
+
+        return view('layouts.task.form_create', compact('priority', 'category_slug'));
+    }
+
+    public function store(TaskRequest $request, $slug)
+    {
+        $userId = Auth::id();
+
+        $categoryId = Category::whereTranslation('slug', $slug)
+            ->firstOrFail()
+            ->id;
+
+        $newslug = Str::slug($request->input('title'));
+
+        if (Task::where('slug', $newslug)->exists()) {
+            $newslug = $this->makeUniqueSlug($newslug);
+        }
+
+        $validatedData = $request->validated();
+
+        Task::create([
+            'title' => $validatedData['title'],
+            'description' => $validatedData['description'],
+            'due_date' => $validatedData['due_date'],
+            'priority_id' => $validatedData['priority_id'],
+            'slug' => $newslug,
+            'user_id' => $userId,
+            'category_id' => $categoryId,
+        ]);
+
+        return redirect()->route('tasks.list', ['slug' => $slug])->with('success', 'Завдання успішно додано!');
     }
 
     public function edit($slug)
@@ -46,11 +87,31 @@ class TaskController extends Controller
     {
         $task = Task::where('id', $id)->firstOrFail();
 
-        // if ($task->user_id !== Auth::id()) {
-        //     abort(403, 'This action is unauthorized.');
-        // }
-        dd($task);
+        if ($request->input('title') != $task->title) {
+            $newslug = Str::slug($request->input('title'));
+
+            if (Task::where('slug', $newslug)->exists()) {
+                $newslug = $this->makeUniqueSlug($newslug);
+            }
+
+            $task->slug = $newslug;
+        }
+
+        $task->update($request->validated());
 
         return redirect()->route('tasks.list', ['slug' => $slug])->with('success', 'Завдання успішно оновлено!');
+    }
+
+    private function makeUniqueSlug($slug)
+    {
+        $originalSlug = $slug;
+        $count = 1;
+
+        while (Task::where('slug', $slug)->exists()) {
+            $slug = $originalSlug . '-' . $count;
+            $count++;
+        }
+
+        return $slug;
     }
 }

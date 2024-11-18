@@ -176,6 +176,9 @@ return [
         'attribute-name' => [
             'rule-name' => 'custom-message',
         ],
+        'due_date' => [
+            'date_format' => 'Поле "Термін виконання" має відповідати формату d.m.Y.',
+        ],
     ],
 
     /*
@@ -189,6 +192,11 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        'title' => 'назва',
+        'description' => 'опис',
+        'priority_id' => 'пріоритет',
+        'due_date' => 'термін виконання',
+    ],
 
 ];

@@ -26,6 +26,8 @@ Route::group(
             Route::get('/category/{slug}', [TaskController::class, 'lists'])->name('tasks.list');
             Route::get('/task/{slug}', [TaskController::class, 'edit'])->name('task.edit');
             Route::put('/task/{id}/{slug}', [TaskController::class, 'update'])->name('task.update');
+            Route::get('/category/{slug}/task/create', [TaskController::class, 'create'])->name('task.create');
+            Route::post('/task/store/{slug}', [TaskController::class, 'store'])->name('task.store');
         });
 
         require __DIR__ . '/auth.php';

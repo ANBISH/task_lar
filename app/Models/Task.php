@@ -45,11 +45,11 @@ class Task extends Model
 
     public function getDueDateAttribute($value)
     {
-        return \Carbon\Carbon::parse($value)->format('d.m.Y');
+        return \Carbon\Carbon::parse($value)->format('d-m-Y');
     }
 
     public function setDueDateAttribute($value)
     {
-        $this->attributes['due_date'] = \Carbon\Carbon::createFromFormat('d.m.Y', $value);
+        $this->attributes['due_date'] = !empty($value) ? \Carbon\Carbon::createFromFormat('d-m-Y', $value)->format('Y-m-d') : null ;
     }
 }
