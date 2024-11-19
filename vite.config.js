@@ -11,4 +11,9 @@ export default defineConfig({
             refresh: true,
         }),
     ],
+    server: {
+        watch: {
+            ignored: ['**/public/storage/**'] // Ігноруємо символічне посилання на public/storage
+        }
+    }
 });

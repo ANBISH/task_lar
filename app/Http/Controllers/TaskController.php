@@ -6,6 +6,7 @@ use App\Http\Requests\TaskRequest;
 use App\Models\Category;
 use App\Models\Priority;
 use App\Models\Task;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 
@@ -23,6 +24,7 @@ class TaskController extends Controller
             ->whereTranslation('slug', $slug)
             ->with(['tasks' => function ($query) use ($userId) {
                 $query->where('user_id', $userId)
+                    ->where('is_completed', 0)
                     ->with('priority');
             }])
             ->firstOrFail()
@@ -101,6 +103,53 @@ class TaskController extends Controller
 
         return redirect()->route('tasks.list', ['slug' => $slug])->with('success', 'Завдання успішно оновлено!');
     }
+
+    public function updateStatus(Request $request, Task $task)
+    {
+        $request->validate([
+            'is_completed' => 'required|boolean',
+        ]);
+
+        $task->is_completed = $request->is_completed;
+        $task->save();
+
+        return response()->json(['success' => true]);
+    }
+
+    public function completedTasks($slug)
+    {
+        $userId = Auth::id();
+
+        $tasks = Category::whereActive(1)
+            ->whereTranslation('slug', $slug)
+            ->with(['tasks' => function ($query) use ($userId) {
+                $query->where('user_id', $userId)
+                    ->where('is_completed', 0)
+                    ->with('priority');
+            }])
+            ->firstOrFail()
+            ->tasks;
+
+        return view('layouts.task.table.task_table', compact('tasks'))->render();
+    }
+
+    public function filterTasks(Request $request, $slug)
+    {
+        $isCompleted = $request->query('is_completed', null);
+
+        $category = Category::whereTranslation('slug', $slug)->firstOrFail();
+        $query = $category->tasks()->where('user_id', Auth::id());
+
+        if (!is_null($isCompleted)) {
+            $query->where('is_completed', $isCompleted);
+        }
+
+        $tasks = $query->with('priority')->get();
+
+        return view('layouts.task.table.task_table', compact('tasks'))->render();
+    }
+
+
 
     private function makeUniqueSlug($slug)
     {

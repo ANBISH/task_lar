@@ -7,6 +7,7 @@ return [
     'priority' => 'Priority:',
     'date_due' => 'Due date:',
     'error' => 'The field must be filled in correctly.',
+    'create' => 'Create +',
 
     'title_placeholder' => 'Enter task title',
 

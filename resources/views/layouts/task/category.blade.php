@@ -1,10 +1,14 @@
 @extends('common.home')
 
+@section('category_slug')
+    <meta name="category-slug" content="{{ $category_slug }}">
+@endsection
+
 @section('content')
     <div class="mb-6">
         <a href="{{ route('task.create', ['slug' => $category_slug]) }}"
             class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
-            Створити +
+            {{ __('task/form.create') }}
         </a>
     </div>
 
@@ -19,7 +23,7 @@
                         <path
                             d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm3.982 13.982a1 1 0 0 1-1.414 0l-3.274-3.274A1.012 1.012 0 0 1 9 10V6a1 1 0 0 1 2 0v3.586l2.982 2.982a1 1 0 0 1 0 1.414Z" />
                     </svg>
-                    Last 30 days
+                    Не виконані
                     <svg class="w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
                         viewBox="0 0 10 6">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -38,8 +42,8 @@
                                 <input id="filter-radio-example-1" type="radio" value="" name="filter-radio"
                                     class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
                                 <label for="filter-radio-example-1"
-                                    class="w-full ms-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300">Last
-                                    day</label>
+                                    class="w-full ms-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300">
+                                    Виконані</label>
                             </div>
                         </li>
                         <li>
@@ -48,35 +52,8 @@
                                     name="filter-radio"
                                     class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
                                 <label for="filter-radio-example-2"
-                                    class="w-full ms-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300">Last
-                                    7 days</label>
-                            </div>
-                        </li>
-                        <li>
-                            <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
-                                <input id="filter-radio-example-3" type="radio" value="" name="filter-radio"
-                                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-                                <label for="filter-radio-example-3"
-                                    class="w-full ms-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300">Last
-                                    30 days</label>
-                            </div>
-                        </li>
-                        <li>
-                            <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
-                                <input id="filter-radio-example-4" type="radio" value="" name="filter-radio"
-                                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-                                <label for="filter-radio-example-4"
-                                    class="w-full ms-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300">Last
-                                    month</label>
-                            </div>
-                        </li>
-                        <li>
-                            <div class="flex items-center p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
-                                <input id="filter-radio-example-5" type="radio" value="" name="filter-radio"
-                                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-                                <label for="filter-radio-example-5"
-                                    class="w-full ms-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300">Last
-                                    year</label>
+                                    class="w-full ms-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300">
+                                    Не виконані</label>
                             </div>
                         </li>
                     </ul>
@@ -125,35 +102,8 @@
                     </th>
                 </tr>
             </thead>
-            <tbody>
-                @foreach ($tasks as $task)
-                    <tr
-                        class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                        <td class="w-4 p-4">
-                            <div class="flex items-center">
-                                <input id="checkbox-table-search-1" type="checkbox"
-                                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-                                <label for="checkbox-table-search-1" class="sr-only">checkbox</label>
-                            </div>
-                        </td>
-                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                            {{ Str::limit($task->title, 15, '...') }}
-                        </th>
-                        <td class="px-6 py-4" style="background:{{ $task->priority->color }};">
-                            {{ $task->priority->title }}
-                        </td>
-                        <td class="px-6 py-4">
-                            {{ Str::limit($task->description, 25, '...') }}
-                        </td>
-                        <td class="px-6 py-4">
-                            {{ \Carbon\Carbon::parse($task->due_date)->format('d-m-y') }}
-                        </td>
-                        <td class="px-6 py-4">
-                            <a href="{{ route('task.edit', ['slug' => $task->slug]) }}"
-                                class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
-                        </td>
-                    </tr>
-                @endforeach
+            <tbody id="completed-tasks">
+                @include('layouts.task.table.task_table', ['tasks' => $tasks])
             </tbody>
         </table>
     </div>
