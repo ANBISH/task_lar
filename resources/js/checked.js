@@ -1,12 +1,16 @@
 document.addEventListener('DOMContentLoaded', function () {
     const completedTasksContainer = document.getElementById('completed-tasks');
-    const slug = document.querySelector('meta[name="category-slug"]').getAttribute('content');
+    let slug = document.querySelector('meta[name="category-slug"]');
+    if(slug) {
+        slug = document.querySelector('meta[name="category-slug"]').getAttribute('content');
+    }
 
     document.body.addEventListener('change', function (event) {
         if (event.target.classList.contains('task-checkbox')) {
             const checkbox = event.target;
             const taskId = checkbox.getAttribute('data-task_id');
             const isCompleted = checkbox.checked ? 1 : 0;
+            const status = isCompleted ? 0 : 1;
 
             fetch(`/tasks/${taskId}/update-status`, {
                 method: 'POST',
@@ -19,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        fetch(`/categories/${slug}/completed-tasks`)
+                        fetch(`/categories/${slug}/completed-tasks/${status}`)
                             .then(response => response.text())
                             .then(html => {
                                 completedTasksContainer.innerHTML = html;
@@ -31,6 +35,26 @@ document.addEventListener('DOMContentLoaded', function () {
                 .catch(error => console.error('Ajax Error:', error));
         }
     });
+
+    document.body.addEventListener('input', function (event) {
+        if (event.target.id === 'table-search') {
+            const searchTerm = event.target.value;
+            const selectedFilter = document.querySelector('input[name="filter-radio"]:checked').value;
+
+            fetch(`/tasks/search?search=${encodeURIComponent(searchTerm)}&filter=${encodeURIComponent(selectedFilter)}&slug=${encodeURIComponent(slug)}`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            })
+                .then(response => response.text())
+                .then(data => {
+                        completedTasksContainer.innerHTML = data;
+                })
+                .catch(error => console.error('Ajax Error:', error));
+        }
+    });
+
 
     document.body.addEventListener('change', function (event) {
         if (event.target.name === 'filter-radio') {

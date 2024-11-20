@@ -116,15 +116,15 @@ class TaskController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function completedTasks($slug)
+    public function completedTasks($slug, $isCompleted)
     {
         $userId = Auth::id();
 
         $tasks = Category::whereActive(1)
             ->whereTranslation('slug', $slug)
-            ->with(['tasks' => function ($query) use ($userId) {
+            ->with(['tasks' => function ($query) use ($userId, $isCompleted) {
                 $query->where('user_id', $userId)
-                    ->where('is_completed', 0)
+                    ->where('is_completed', $isCompleted)
                     ->with('priority');
             }])
             ->firstOrFail()
@@ -135,21 +135,40 @@ class TaskController extends Controller
 
     public function filterTasks(Request $request, $slug)
     {
-        $isCompleted = $request->query('is_completed', null);
+        $isCompleted = $request->query('is_completed');
 
         $category = Category::whereTranslation('slug', $slug)->firstOrFail();
         $query = $category->tasks()->where('user_id', Auth::id());
 
-        if (!is_null($isCompleted)) {
-            $query->where('is_completed', $isCompleted);
-        }
+        $query->where('is_completed', $isCompleted);
 
         $tasks = $query->with('priority')->get();
 
         return view('layouts.task.table.task_table', compact('tasks'))->render();
     }
 
+    public function search(Request $request) {
+        $userId = Auth::id();
 
+        $searchTerm = $request->input('search');
+        $slug = $request->input('slug');
+        $isCompleted = $request->input('filter');
+
+        $tasks = Category::whereActive(1)
+            ->whereTranslation('slug', $slug)
+            ->with(['tasks' => function ($query) use ($userId, $isCompleted, $searchTerm) {
+                $query->where('user_id', $userId)
+                    ->where('is_completed', $isCompleted)
+                    ->when($searchTerm, function ($query, $searchTerm) {
+                        $query->where('title', 'LIKE', "%{$searchTerm}%");
+                    })
+                    ->with('priority');
+            }])
+            ->firstOrFail()
+            ->tasks;
+
+        return view('layouts.task.table.task_table', compact('tasks'))->render();
+    }
 
     private function makeUniqueSlug($slug)
     {

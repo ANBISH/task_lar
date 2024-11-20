@@ -46,7 +46,6 @@ class CategoryCrudController extends CrudController
     protected function setupCreateOperation()
     {
         CRUD::setValidation(CategoryRequest::class);
-        // $this->crud->setValidation(CategoryRequest::class);
 
         foreach (get_locales() as $locale) {
 

@@ -6,7 +6,6 @@ use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
-// dd(LaravelLocalization::setLocale());
 Route::group(
     [
         'prefix' => LaravelLocalization::setLocale(),
@@ -32,9 +31,10 @@ Route::group(
             Route::post('/task/store/{slug}', [TaskController::class, 'store'])->name('task.store');
             Route::post('/tasks/{task}/update-status', [TaskController::class, 'updateStatus'])->name('tasks.updateStatus');
 
-            Route::get('/categories/{slug}/completed-tasks', [TaskController::class, 'completedTasks'])
+            Route::get('/categories/{slug}/completed-tasks/{isCompleted}', [TaskController::class, 'completedTasks'])
                 ->name('task.completed');
             Route::get('/categories/{slug}/tasks', [TaskController::class, 'filterTasks'])->name('tasks.filter');
+            Route::get('/tasks/search', [TaskController::class, 'search'])->name('tasks.search');
         });
 
         require __DIR__ . '/auth.php';
