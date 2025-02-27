@@ -11,3 +11,7 @@
 5) composer install
 
 5) npm run build
+
+6) docker exec -it cursova_task-php-1 bash
+
+7) php artisan db:seed
