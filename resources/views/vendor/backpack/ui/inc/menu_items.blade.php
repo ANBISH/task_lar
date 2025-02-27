@@ -5,4 +5,4 @@
 <x-backpack::menu-item title="Categories" icon="las la-stream" :link="backpack_url('category')" />
 <x-backpack::menu-item title="Priorities" icon="las la-list-ol" :link="backpack_url('priority')" />
 <x-backpack::menu-item title="Tasks" icon="las la-tasks" :link="backpack_url('task')" />
-<x-backpack::menu-item title="Task financials" icon="las la-coins" :link="backpack_url('task-financial')" />
+{{-- <x-backpack::menu-item title="Task financials" icon="las la-coins" :link="backpack_url('task-financial')" /> --}}

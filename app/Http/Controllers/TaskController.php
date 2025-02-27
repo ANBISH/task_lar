@@ -2,35 +2,41 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\FilterTasksRequest;
 use App\Http\Requests\TaskRequest;
 use App\Models\Category;
 use App\Models\Priority;
 use App\Models\Task;
+use App\Services\TaskFilterSearchService;
+use App\Services\TaskService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Auth;
 
 
 class TaskController extends Controller
 {
+    protected $taskService;
+    protected $taskFilterSearchService;
+
+    public function __construct(TaskService $taskService, TaskFilterSearchService $taskFilterSearchService)
+    {
+        $this->taskService = $taskService;
+        $this->taskFilterSearchService = $taskFilterSearchService;
+    }
 
     public function lists($slug)
     {
-        $userId = Auth::id();
-
         $category_slug = $slug;
 
-        $tasks = Category::whereActive(1)
-            ->whereTranslation('slug', $slug)
-            ->with(['tasks' => function ($query) use ($userId) {
-                $query->where('user_id', $userId)
-                    ->where('is_completed', 0)
-                    ->with('priority');
-            }])
-            ->firstOrFail()
-            ->tasks;
+        $tasks = $this->taskService->getTasksByCategorySlug($slug);
 
         return view('layouts.task.category', compact('tasks', 'category_slug'));
+    }
+
+    public function store(TaskRequest $request, $slug)
+    {
+        $this->taskService->createTask($request->validated(), $slug);
+
+        return redirect()->route('tasks.list', ['slug' => $slug])->with('success', 'Завдання успішно додано!');
     }
 
     public function create($slug)
@@ -42,38 +48,8 @@ class TaskController extends Controller
         return view('layouts.task.form_create', compact('priority', 'category_slug'));
     }
 
-    public function store(TaskRequest $request, $slug)
-    {
-        $userId = Auth::id();
-
-        $categoryId = Category::whereTranslation('slug', $slug)
-            ->firstOrFail()
-            ->id;
-
-        $newslug = Str::slug($request->input('title'));
-
-        if (Task::where('slug', $newslug)->exists()) {
-            $newslug = $this->makeUniqueSlug($newslug);
-        }
-
-        $validatedData = $request->validated();
-
-        Task::create([
-            'title' => $validatedData['title'],
-            'description' => $validatedData['description'],
-            'due_date' => $validatedData['due_date'],
-            'priority_id' => $validatedData['priority_id'],
-            'slug' => $newslug,
-            'user_id' => $userId,
-            'category_id' => $categoryId,
-        ]);
-
-        return redirect()->route('tasks.list', ['slug' => $slug])->with('success', 'Завдання успішно додано!');
-    }
-
     public function edit($slug)
     {
-
         $task = Task::where('slug', $slug)->with('priority')->firstOrFail();
 
         $priority = Priority::all();
@@ -87,99 +63,42 @@ class TaskController extends Controller
 
     public function update(TaskRequest $request, $id, $slug)
     {
-        $task = Task::where('id', $id)->firstOrFail();
+        $task = Task::findOrFail($id);
 
-        if ($request->input('title') != $task->title) {
-            $newslug = Str::slug($request->input('title'));
-
-            if (Task::where('slug', $newslug)->exists()) {
-                $newslug = $this->makeUniqueSlug($newslug);
-            }
-
-            $task->slug = $newslug;
-        }
-
-        $task->update($request->validated());
+        $this->taskService->updateTask($task, $request->validated());
 
         return redirect()->route('tasks.list', ['slug' => $slug])->with('success', 'Завдання успішно оновлено!');
     }
 
-    public function updateStatus(Request $request, Task $task)
+    public function updateStatus(FilterTasksRequest $request, Task $task)
     {
-        $request->validate([
-            'is_completed' => 'required|boolean',
-        ]);
-
-        $task->is_completed = $request->is_completed;
-        $task->save();
+        $this->taskService->updateTaskStatus($task, $request->is_completed);
 
         return response()->json(['success' => true]);
     }
 
     public function completedTasks($slug, $isCompleted)
     {
-        $userId = Auth::id();
-
-        $tasks = Category::whereActive(1)
-            ->whereTranslation('slug', $slug)
-            ->with(['tasks' => function ($query) use ($userId, $isCompleted) {
-                $query->where('user_id', $userId)
-                    ->where('is_completed', $isCompleted)
-                    ->with('priority');
-            }])
-            ->firstOrFail()
-            ->tasks;
+        $tasks = $this->taskFilterSearchService->getCompletedTasks($slug, $isCompleted);
 
         return view('layouts.task.table.task_table', compact('tasks'))->render();
     }
 
-    public function filterTasks(Request $request, $slug)
+    public function filterTasks(FilterTasksRequest $request, $slug)
     {
-        $isCompleted = $request->query('is_completed');
-
-        $category = Category::whereTranslation('slug', $slug)->firstOrFail();
-        $query = $category->tasks()->where('user_id', Auth::id());
-
-        $query->where('is_completed', $isCompleted);
-
-        $tasks = $query->with('priority')->get();
+        $tasks = $this->taskFilterSearchService->filterTasks($slug, $request->query('is_completed'));
 
         return view('layouts.task.table.task_table', compact('tasks'))->render();
     }
 
-    public function search(Request $request) {
-        $userId = Auth::id();
-
-        $searchTerm = $request->input('search');
-        $slug = $request->input('slug');
-        $isCompleted = $request->input('filter');
-
-        $tasks = Category::whereActive(1)
-            ->whereTranslation('slug', $slug)
-            ->with(['tasks' => function ($query) use ($userId, $isCompleted, $searchTerm) {
-                $query->where('user_id', $userId)
-                    ->where('is_completed', $isCompleted)
-                    ->when($searchTerm, function ($query, $searchTerm) {
-                        $query->where('title', 'LIKE', "%{$searchTerm}%");
-                    })
-                    ->with('priority');
-            }])
-            ->firstOrFail()
-            ->tasks;
-
-        return view('layouts.task.table.task_table', compact('tasks'))->render();
-    }
-
-    private function makeUniqueSlug($slug)
+    public function search(Request $request)
     {
-        $originalSlug = $slug;
-        $count = 1;
+        $tasks = $this->taskFilterSearchService->searchTasks(
+            $request->input('slug'),
+            $request->input('filter'),
+            $request->input('search')
+        );
 
-        while (Task::where('slug', $slug)->exists()) {
-            $slug = $originalSlug . '-' . $count;
-            $count++;
-        }
-
-        return $slug;
+        return view('layouts.task.table.task_table', compact('tasks'))->render();
     }
 }

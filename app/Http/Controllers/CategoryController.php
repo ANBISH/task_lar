@@ -9,8 +9,6 @@ class CategoryController extends Controller{
 
         $categories = Category::whereActive(1)->with('translations')->get();
 
-        dd($categories);
-
         return view('common.menu', compact('categories'));
     }
 }
